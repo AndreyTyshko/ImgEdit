@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ImgEdit</string>
+    <string name="rotate">Rotate</string>
+    <string name="invert_colors">Invert Colors</string>
+    <string name="mirror_image">Mirror Image</string>
+
+</resources>
