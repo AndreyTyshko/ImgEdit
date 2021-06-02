@@ -1,7 +1,6 @@
 package com.example.imgedit
 
-import android.graphics.Bitmap
-import android.graphics.Matrix
+import android.graphics.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,13 +19,14 @@ class MainActivityViewModel : ViewModel() {
        }
     }
 
-    fun mirror(bitmap: Bitmap){
+    fun invertColors(bitmap: Bitmap){
         viewModelScope.launch {
+
 
         }
     }
 
-    fun invertColors(){
+    fun mirror(){
 
     }
 

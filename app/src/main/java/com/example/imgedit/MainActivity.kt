@@ -9,6 +9,8 @@ import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.graphics.Bitmap
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -50,12 +52,37 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-        buttonInvColor.setOnClickListener {
-            viewModel.invertColors()
+       /* buttonInvColor.setOnClickListener {
+            viewModel.invertColors(theBitmap!!)
             viewModel.changedImage.observe(this, {
                 imageViewResult.setImageBitmap(it)
             })
+        }*/
+
+
+        buttonInvColor.setOnClickListener {
+
+            imageViewResult.setImageURI(image_Uri)
+            val myDrawable = imageViewResult.drawable
+            val matrixInvert = ColorMatrix().apply {
+                set(
+                    floatArrayOf(
+                        -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
+                        0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
+                        0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
+                        0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+                    )
+                )
+            }
+            val filter = ColorMatrixColorFilter(matrixInvert)
+
+            myDrawable.colorFilter = filter
+            imageViewResult.setImageDrawable(myDrawable)
+            imageViewResult.invalidate()
+
+
         }
+
     }
 
 
