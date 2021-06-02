@@ -11,9 +11,11 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.graphics.Bitmap
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private var image_Uri: Uri? = null
     private var theBitmap: Bitmap? = null
+    private var drawable: Drawable?= null
     private var storagePermission: Array<String>? = null
 
     private val viewModel: MainActivityViewModel by lazy {
@@ -43,7 +46,6 @@ class MainActivity : AppCompatActivity() {
             showImagePickDialog()
         }
 
-        viewModel.changedImage
 
         buttonRotate.setOnClickListener {
             viewModel.rotate(theBitmap!!, 90f)
@@ -52,35 +54,11 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-       /* buttonInvColor.setOnClickListener {
-            viewModel.invertColors(theBitmap!!)
-            viewModel.changedImage.observe(this, {
-                imageViewResult.setImageBitmap(it)
-            })
-        }*/
-
-
         buttonInvColor.setOnClickListener {
-
-            imageViewResult.setImageURI(image_Uri)
-            val myDrawable = imageViewResult.drawable
-            val matrixInvert = ColorMatrix().apply {
-                set(
-                    floatArrayOf(
-                        -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
-                        0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
-                        0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
-                        0.0f, 0.0f, 0.0f, 1.0f, 0.0f
-                    )
-                )
-            }
-            val filter = ColorMatrixColorFilter(matrixInvert)
-
-            myDrawable.colorFilter = filter
-            imageViewResult.setImageDrawable(myDrawable)
-            imageViewResult.invalidate()
-
-
+            viewModel.invertColors(drawable!!)
+            viewModel.changedImageInverted.observe(this,{
+                imageViewResult.setImageDrawable(it)
+            })
         }
 
     }
@@ -215,8 +193,12 @@ class MainActivity : AppCompatActivity() {
                 image_Uri = data!!.data
                 theBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, image_Uri)
                 iv_input_img.setImageURI(image_Uri)
+                drawable = iv_input_img.drawable
             } else if (requestCode == IMAGE_PICK_CAMERA_CODE) {
                 iv_input_img.setImageURI(image_Uri)
+                image_Uri = data!!.data
+                theBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, image_Uri)
+                drawable = iv_input_img.drawable
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
