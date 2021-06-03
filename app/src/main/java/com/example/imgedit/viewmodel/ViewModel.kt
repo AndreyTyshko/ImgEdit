@@ -1,4 +1,4 @@
-package com.example.imgedit
+package com.example.imgedit.viewmodel
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
@@ -36,14 +36,8 @@ class MainActivityViewModel : ViewModel() {
     fun invertColors(drawable: Drawable) {
         viewModelScope.launch {
             val matrixInvert = ColorMatrix().apply {
-                set(
-                    floatArrayOf(
-                        -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
-                        0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
-                        0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
-                        0.0f, 0.0f, 0.0f, 1.0f, 0.0f
-                    )
-                )
+                setSaturation(0F)
+
             }
             val filter = ColorMatrixColorFilter(matrixInvert)
             drawable.colorFilter = filter

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/imageEditorFragment">
+
+    <fragment
+        android:id="@+id/imageEditorFragment"
+        android:name="com.example.imgedit.view.ImageEditorFragment"
+        android:label="fragment_image_editor_framgnet"
+        tools:layout="@layout/fragment_image_editor_framgnet" />
+</navigation>
