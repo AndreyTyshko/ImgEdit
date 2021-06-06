@@ -5,6 +5,9 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.imgedit.dataBase.dao.OperationDao
+
+import com.example.imgedit.database.entity.EditedImageModel
 import kotlinx.coroutines.launch
 
 
@@ -12,7 +15,7 @@ class MainActivityViewModel : ViewModel() {
 
     var changedImage: MutableLiveData<Bitmap> = MutableLiveData()
     var changedImageInverted: MutableLiveData<Drawable> = MutableLiveData()
-
+    private var dao: OperationDao?=null
 
 
     fun rotate(bitmap: Bitmap, angle: Float) {
