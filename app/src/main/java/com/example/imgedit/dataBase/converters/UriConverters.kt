@@ -1,4 +1,4 @@
-package com.example.imgedit.dataBase
+package com.example.imgedit.dataBase.converters
 
 import android.net.Uri
 import androidx.room.TypeConverter

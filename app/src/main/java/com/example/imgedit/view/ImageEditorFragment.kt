@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -12,35 +13,40 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.MediaStore.Images
+import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.imgedit.MainActivity
 import com.example.imgedit.R
+import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.viewmodel.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_image_editor_framgnet.*
+import java.io.ByteArrayOutputStream
+
 
 class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
     private var currentImage: Uri? = null
     private val storagePermission: Array<String>? = null
-    private var adapter:ImageAdapter?=null
+    private var imageAdapter: ImageAdapter? = null
 
-    private val viewModel: MainActivityViewModel by lazy {
-        MainActivityViewModel()
-    }
+    lateinit var viewModel: MainActivityViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        adapter= ImageAdapter()
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter?.setOnItemClickListener {
+        viewModel = (activity as MainActivity).viewModel
+        bindRV()
+
+        imageAdapter?.setOnItemClickListener {
             imageViewResult.setImageURI(it)
         }
 
@@ -50,7 +56,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
 
         buttonRotate.setOnClickListener {
-            if (currentImage != null) {
+            if (!hasImage(iv_input_img)) {
                 errorMessage()
             } else {
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
@@ -62,16 +68,33 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
 
         buttonMirrImg.setOnClickListener {
-            if (currentImage != null) {
+            if (!hasImage(iv_input_img)) {
                 errorMessage()
             } else {
                 imageViewResult.setImageDrawable(iv_input_img.drawable)
                 imageViewResult.rotationY = 180f
-            }
-        }
 
+
+                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap
+                val rnds = (0..100).random()
+                getImageUri(requireContext(), bitmap)?.let { it1 ->
+                    EditedImageModel(
+                        rnds, "Operation Mirror",
+                        it1
+                    )
+                }?.let { it2 -> viewModel.upsertOperation(it2) }
+
+            }
+
+
+        }
+        viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
+            Log.d("TAG",it.toString())
+            imageAdapter?.differ?.submitList(it)
+
+        }
         buttonInvColor.setOnClickListener {
-            if (currentImage != null) {
+            if (!hasImage(iv_input_img)) {
                 errorMessage()
             } else {
                 viewModel.invertColors(iv_input_img.drawable)
@@ -82,6 +105,31 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
         }
 
+    }
+
+    private fun bindRV() {
+         imageAdapter = ImageAdapter()
+        recyclerView.apply {
+            adapter = imageAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
+    }
+
+    fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
+        val bytes = ByteArrayOutputStream()
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path =
+            Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null)
+        return Uri.parse(path)
+    }
+
+    private fun hasImage(view: ImageView): Boolean {
+        val drawable: Drawable = view.getDrawable()
+        var hasImage = drawable != null
+        if (hasImage && drawable is BitmapDrawable) {
+            hasImage = drawable.bitmap != null
+        }
+        return hasImage
     }
 
     private fun errorMessage() = Snackbar.make(

@@ -1,21 +1,40 @@
 package com.example.imgedit.viewmodel
 
+import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.imgedit.dataBase.dao.OperationDao
+import com.example.imgedit.dataBase.entity.EditedImageModel
+import com.example.imgedit.repository.usecase.DeleteOperationUseCase
+import com.example.imgedit.repository.usecase.GetAllOperationsUseCase
+import com.example.imgedit.repository.usecase.UpsertOperationUseCase
 
-import com.example.imgedit.database.entity.EditedImageModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-class MainActivityViewModel : ViewModel() {
+class MainActivityViewModel @Inject constructor(
+  private val deleteOperationUseCase: DeleteOperationUseCase,
+  private val upsertOperationUseCase: UpsertOperationUseCase,
+  private val getAllOperationsUseCase: GetAllOperationsUseCase,
+  private val context: Context
+) : ViewModel() {
 
     var changedImage: MutableLiveData<Bitmap> = MutableLiveData()
     var changedImageInverted: MutableLiveData<Drawable> = MutableLiveData()
-    private var dao: OperationDao?=null
+
+    fun upsertOperation(editedImageModel: EditedImageModel){
+        viewModelScope.launch {
+            Log.d("TAG","STT")
+            upsertOperationUseCase.invoke(editedImageModel)
+        }
+    }
+
+    fun getAllOperations() = getAllOperationsUseCase
+
 
 
     fun rotate(bitmap: Bitmap, angle: Float) {

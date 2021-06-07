@@ -1,4 +1,4 @@
-package com.example.imgedit.database.entity
+package com.example.imgedit.dataBase.entity
 
 import android.net.Uri
 import androidx.room.Entity
