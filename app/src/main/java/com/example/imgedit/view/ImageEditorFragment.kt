@@ -24,7 +24,6 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.imgedit.MainActivity
 import com.example.imgedit.R
-import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.viewmodel.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_image_editor_framgnet.*
@@ -44,6 +43,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = (activity as MainActivity).viewModel
+
         bindRV()
 
         imageAdapter?.setOnItemClickListener {
@@ -67,32 +67,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             }
         }
 
-        buttonMirrImg.setOnClickListener {
-            if (!hasImage(iv_input_img)) {
-                errorMessage()
-            } else {
-                imageViewResult.setImageDrawable(iv_input_img.drawable)
-                imageViewResult.rotationY = 180f
 
-
-                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap
-                val rnds = (0..100).random()
-                getImageUri(requireContext(), bitmap)?.let { it1 ->
-                    EditedImageModel(
-                        rnds, "Operation Mirror",
-                        it1
-                    )
-                }?.let { it2 -> viewModel.upsertOperation(it2) }
-
-            }
-
-
-        }
-        viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
-            Log.d("TAG",it.toString())
-            imageAdapter?.differ?.submitList(it)
-
-        }
         buttonInvColor.setOnClickListener {
             if (!hasImage(iv_input_img)) {
                 errorMessage()
@@ -102,13 +77,36 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                     imageViewResult.setImageDrawable(it)
                 }
             }
-
         }
 
+        buttonMirrImg.setOnClickListener {
+            if (!hasImage(iv_input_img)) {
+                errorMessage()
+            } else {
+                /*imageViewResult.setImageDrawable(iv_input_img.drawable)
+                imageViewResult.rotationY = 180f
+                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap
+                val rnds = (0..100).random()
+                getImageUri(requireContext(), bitmap)?.let { it1 ->
+                    EditedImageModel(rnds, "Operation Mirror", it1 )
+                }?.let { it2 -> viewModel.upsertOperation(it2) }*/
+
+                val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
+                viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
+                viewModel.changedImageMirror.observe(requireActivity()) {
+                    imageViewResult.setImageBitmap(it)
+                }
+            }
+        }
+
+        viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
+            Log.d("TAG", it.toString())
+            imageAdapter?.differ?.submitList(it)
+        }
     }
 
     private fun bindRV() {
-         imageAdapter = ImageAdapter()
+        imageAdapter = ImageAdapter()
         recyclerView.apply {
             adapter = imageAdapter
             layoutManager = LinearLayoutManager(activity)
@@ -195,9 +193,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     private fun requestStoragePermission() {
         storagePermission?.let {
             ActivityCompat.requestPermissions(
-                requireActivity(),
-                it,
-                STORAGE_REQUEST_CODE
+                requireActivity(), it, STORAGE_REQUEST_CODE
             )
         }
     }

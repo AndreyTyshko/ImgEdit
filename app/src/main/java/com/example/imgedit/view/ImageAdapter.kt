@@ -36,13 +36,12 @@ class ImageAdapter() : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         return ImageViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_image_history,
-                parent,
-                false
+                R.layout.item_image_history, parent, false
             )
         )
     }
 
+    //TODO
     private var onItemClickListener: ((Uri) -> Unit)? = null
 
     fun setOnItemClickListener(listener: (Uri) -> Unit) {
