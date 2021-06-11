@@ -15,5 +15,4 @@ import androidx.room.TypeConverter
         return uri.toString()
     }
 
-
 }

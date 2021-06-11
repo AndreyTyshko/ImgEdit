@@ -72,9 +72,8 @@
 
     <ImageView
         android:id="@+id/imageViewResult"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="159dp"
+        android:layout_height="77dp"
         android:layout_marginBottom="8dp"
         android:src="@drawable/ic_person"
         app:layout_constraintBottom_toTopOf="@id/tv_output"

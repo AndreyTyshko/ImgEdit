@@ -1,13 +1,17 @@
 package com.example.imgedit.dataBase.repositoryimpl
 
+import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import com.example.imgedit.dataBase.datasource.LocalHistoryDataSource
+import com.example.imgedit.dataBase.datasource.OperationDataSource
 import com.example.imgedit.repository.OperationsRepository
 import com.example.imgedit.dataBase.entity.EditedImageModel
 import javax.inject.Inject
 
-class OperationRepositoryImpl @Inject constructor(private val localHistoryDataSource: LocalHistoryDataSource) :
-    OperationsRepository {
+class OperationRepositoryImpl @Inject constructor(
+    private val localHistoryDataSource: LocalHistoryDataSource,
+    private val operationDataSource: OperationDataSource
+) : OperationsRepository {
 
     override suspend fun upsertOperation(editedImageModel: EditedImageModel): Long =
         localHistoryDataSource.upsertOperation(editedImageModel)
@@ -17,4 +21,12 @@ class OperationRepositoryImpl @Inject constructor(private val localHistoryDataSo
 
     override suspend fun deleteOperation(editedImageModel: EditedImageModel) =
         localHistoryDataSource.deleteOperation(editedImageModel)
+
+//    override suspend fun flipOperation(editedImageModel: EditedImageModel) {
+//        TODO("Not yet implemented")
+//    }
+
+    override suspend fun rotate(bitmap: Bitmap, angel: Float): Bitmap =
+        operationDataSource.rotate(bitmap,angel)
+
 }

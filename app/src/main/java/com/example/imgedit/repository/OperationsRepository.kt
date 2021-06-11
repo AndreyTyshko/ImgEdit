@@ -1,5 +1,6 @@
 package com.example.imgedit.repository
 
+import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import com.example.imgedit.dataBase.entity.EditedImageModel
 
@@ -10,5 +11,9 @@ interface OperationsRepository {
     fun getAllOperations(): LiveData<List<EditedImageModel>>
 
     suspend fun deleteOperation(editedImageModel: EditedImageModel)
+
+    //suspend fun flipOperation(editedImageModel: EditedImageModel)//исправить
+
+    suspend fun rotate(bitmap: Bitmap, angel: Float): Bitmap
 
 }

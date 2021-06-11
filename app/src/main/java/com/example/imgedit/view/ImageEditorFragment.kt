@@ -13,10 +13,10 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.provider.MediaStore.Images
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -24,6 +24,7 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.imgedit.MainActivity
 import com.example.imgedit.R
+import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.viewmodel.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_image_editor_framgnet.*
@@ -63,6 +64,11 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 viewModel.rotate(bitmap, 90f)
                 viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
+                    val rnds = (0..100).random()
+                    getImageUri(requireContext(), bitmap)?.let { it1 ->
+                        EditedImageModel(rnds, "Operation Mirror", it1 )
+                    }?.let { it2 -> viewModel.upsertOperation(it2) }
+
                 }
             }
         }
@@ -75,27 +81,36 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 viewModel.invertColors(iv_input_img.drawable)
                 viewModel.changedImageInverted.observe(requireActivity()) {
                     imageViewResult.setImageDrawable(it)
+
+
                 }
             }
         }
 
         buttonMirrImg.setOnClickListener {
-            if (!hasImage(iv_input_img)) {
+            if (!hasImage2(iv_input_img)) {
                 errorMessage()
             } else {
-                /*imageViewResult.setImageDrawable(iv_input_img.drawable)
+               /* imageViewResult.setImageDrawable(iv_input_img.drawable)
                 imageViewResult.rotationY = 180f
-                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap
-                val rnds = (0..100).random()
-                getImageUri(requireContext(), bitmap)?.let { it1 ->
-                    EditedImageModel(rnds, "Operation Mirror", it1 )
-                }?.let { it2 -> viewModel.upsertOperation(it2) }*/
-
+                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap*/
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
                 viewModel.changedImageMirror.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
+                    val rnds = (0..100).random()
+                    getImageUri(requireContext(), bitmap)?.let { it1 ->
+                        EditedImageModel(rnds, "Operation Mirror", it1 )
+                    }?.let { it2 -> viewModel.upsertOperation(it2) }
                 }
+
+
+
+               /* val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
+                viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
+                viewModel.changedImageMirror.observe(requireActivity()) {
+                    imageViewResult.setImageBitmap(it)
+                }*/
             }
         }
 
@@ -117,18 +132,26 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         val bytes = ByteArrayOutputStream()
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
         val path =
-            Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null)
+            MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null)
         return Uri.parse(path)
     }
 
     private fun hasImage(view: ImageView): Boolean {
-        val drawable: Drawable = view.getDrawable()
-        var hasImage = drawable != null
+        val drawable = view.drawable
+        var hasImage: Boolean = (drawable != null)
         if (hasImage && drawable is BitmapDrawable) {
             hasImage = drawable.bitmap != null
         }
         return hasImage
     }
+
+    private fun hasImage2(view:ImageView) =
+        view.drawable !=null
+
+
+
+
+
 
     private fun errorMessage() = Snackbar.make(
         requireActivity().findViewById(android.R.id.content),

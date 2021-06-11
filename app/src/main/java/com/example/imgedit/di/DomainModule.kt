@@ -3,6 +3,7 @@ package com.example.imgedit.di
 import com.example.imgedit.repository.OperationsRepository
 import com.example.imgedit.repository.usecase.DeleteOperationUseCase
 import com.example.imgedit.repository.usecase.GetAllOperationsUseCase
+import com.example.imgedit.repository.usecase.RotateImageUseCase
 import com.example.imgedit.repository.usecase.UpsertOperationUseCase
 import dagger.Module
 import dagger.Provides
@@ -29,5 +30,17 @@ class DomainModule {
         operationsRepository: OperationsRepository
     ): UpsertOperationUseCase = UpsertOperationUseCase(operationsRepository)
 
+//
+//    @Singleton
+//    @Provides
+//    fun provideFlipOperationUseCase(
+//        operationsRepository: OperationsRepository
+//    ): UpsertOperationUseCase = UpsertOperationUseCase(operationsRepository)
+
+    @Singleton
+    @Provides
+    fun provideRotateImageUseCase(
+        operationsRepository: OperationsRepository
+    ): RotateImageUseCase = RotateImageUseCase(operationsRepository)
 
 }
