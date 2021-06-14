@@ -7,16 +7,15 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import androidx.annotation.NonNull
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -56,6 +55,8 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
 
 
+
+
         buttonRotate.setOnClickListener {
             if (!hasImage(iv_input_img)) {
                 errorMessage()
@@ -66,7 +67,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                     imageViewResult.setImageBitmap(it)
                     val rnds = (0..100).random()
                     getImageUri(requireContext(), bitmap)?.let { it1 ->
-                        EditedImageModel(rnds, "Operation Mirror", it1 )
+                        EditedImageModel(rnds, "Operation Rotate", it1)
                     }?.let { it2 -> viewModel.upsertOperation(it2) }
 
                 }
@@ -78,39 +79,53 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             if (!hasImage(iv_input_img)) {
                 errorMessage()
             } else {
-                viewModel.invertColors(iv_input_img.drawable)
+
+                val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
+                viewModel.invertColors(bitmap)
                 viewModel.changedImageInverted.observe(requireActivity()) {
-                    imageViewResult.setImageDrawable(it)
-
-
+                    imageViewResult.setImageBitmap(it)
                 }
             }
         }
+
+
+
+        buttonInvColor.setOnClickListener {
+            if (!hasImage(iv_input_img)) {
+                errorMessage()
+            } else {
+
+                val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
+                viewModel.invertColors(bitmap)
+                viewModel.changedImageInverted.observe(requireActivity()) {
+                    imageViewResult.setImageBitmap(it)
+                }
+
+
+            }
+        }
+
+
+
+
+
 
         buttonMirrImg.setOnClickListener {
             if (!hasImage2(iv_input_img)) {
                 errorMessage()
             } else {
-               /* imageViewResult.setImageDrawable(iv_input_img.drawable)
-                imageViewResult.rotationY = 180f
-                val bitmap = (imageViewResult.drawable as BitmapDrawable).bitmap*/
+
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
                 viewModel.changedImageMirror.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
                     val rnds = (0..100).random()
                     getImageUri(requireContext(), bitmap)?.let { it1 ->
-                        EditedImageModel(rnds, "Operation Mirror", it1 )
+                        EditedImageModel(rnds, "Operation Mirror", it1)
                     }?.let { it2 -> viewModel.upsertOperation(it2) }
                 }
 
 
-
-               /* val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
-                viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
-                viewModel.changedImageMirror.observe(requireActivity()) {
-                    imageViewResult.setImageBitmap(it)
-                }*/
             }
         }
 
@@ -132,7 +147,12 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         val bytes = ByteArrayOutputStream()
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
         val path =
-            MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null)
+            MediaStore.Images.Media.insertImage(
+                inContext.getContentResolver(),
+                inImage,
+                "Title",
+                null
+            )
         return Uri.parse(path)
     }
 
@@ -145,12 +165,8 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         return hasImage
     }
 
-    private fun hasImage2(view:ImageView) =
-        view.drawable !=null
-
-
-
-
+    private fun hasImage2(view: ImageView) =
+        view.drawable != null
 
 
     private fun errorMessage() = Snackbar.make(
@@ -279,6 +295,11 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+
+
+
+
+
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -306,5 +327,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         private val IMAGE_PICK_CAMERA_CODE = 400
 
     }
+
 
 }

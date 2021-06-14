@@ -41,6 +41,11 @@ class ImageAdapter() : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
         )
     }
 
+
+
+
+
+
     //TODO
     private var onItemClickListener: ((Uri) -> Unit)? = null
 
