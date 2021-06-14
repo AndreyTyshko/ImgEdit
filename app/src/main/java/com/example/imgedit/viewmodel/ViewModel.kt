@@ -47,82 +47,24 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    /* fun invertColors(drawable: Drawable) {
-         viewModelScope.launch {
-             val matrixInvert = ColorMatrix().apply {
-                 setSaturation(0F)
-             }
-             val filter = ColorMatrixColorFilter(matrixInvert)
-             drawable.colorFilter = filter
-             changedImageInverted.postValue(drawable)
-
-         }
-     }
- */
-
-
-
-
 
     fun invertColors(bitmap: Bitmap) {
         viewModelScope.launch {
-         /*  var  bitmap = Bitmap.createBitmap(
-                bitmap.width,
-                bitmap.height,
-                Bitmap.Config.ARGB_8888
-            )*/
-           var matrix = ColorMatrix().apply {
+
+            var matrix = ColorMatrix().apply {
                 setSaturation(0f)
             }
-           var  filter = ColorMatrixColorFilter(matrix)
-           var  paint = Paint().apply {
+            var filter = ColorMatrixColorFilter(matrix)
+            var paint = Paint().apply {
                 colorFilter = filter
             }
             val mutableBitmap: Bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            Canvas(mutableBitmap).drawBitmap(bitmap,0f,0f,paint)
+            Canvas(mutableBitmap).drawBitmap(bitmap, 0f, 0f, paint)
             changedImageInverted.postValue(Bitmap.createBitmap(mutableBitmap))
         }
-
-        /*//val filter = ColorMatrixColorFilter(matrixInvert)
-        //drawable.colorFilter = filter*/
-
     }
 
-    /*  private fun getGrayscale(bitmap: Bitmap): Bitmap? {
 
-          //Custom color matrix to convert to GrayScale
-          val matrix = floatArrayOf(
-              0.3f, 0.59f, 0.11f, 0f, 0f,
-              0.3f, 0.59f, 0.11f, 0f, 0f,
-              0.3f, 0.59f, 0.11f, 0f, 0f, 0f, 0f, 0f, 1f, 0f
-          )
-          val dest = Bitmap.createBitmap(
-              bitmap.width,
-              bitmap.height,
-              bitmap.config
-          )
-          val canvas = Canvas(dest)
-          val paint = Paint()
-          val filter = ColorMatrixColorFilter(matrix)
-          paint.colorFilter = filter
-          canvas.drawBitmap(bitmap, 0F, 0F, paint)
-          return dest
-      }*/
-    /*fun Bitmap.toGrayscale():Bitmap?{
-       val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-
-       val matrix = ColorMatrix().apply {
-           setSaturation(0f)
-       }
-       val filter = ColorMatrixColorFilter(matrix)
-
-       val paint = Paint().apply {
-           colorFilter = filter
-       }
-
-       Canvas(bitmap).drawBitmap(this, 0F, 0F, paint)
-       return bitmap
-   }*/
     fun imageFlipHorizontal(bitmap: Bitmap, sx: Float, sy: Float) {
         viewModelScope.launch {
             //flipOperationUseCase.invoke(bitmap, COORDINATION_SX, COORDINATION_SY)
