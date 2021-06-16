@@ -16,4 +16,6 @@ interface OperationsRepository {
 
     suspend fun rotate(bitmap: Bitmap, angel: Float): Bitmap
 
+    suspend fun invertColors (bitmap: Bitmap):Bitmap
+
 }

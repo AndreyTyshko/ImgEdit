@@ -29,4 +29,8 @@ class OperationRepositoryImpl @Inject constructor(
     override suspend fun rotate(bitmap: Bitmap, angel: Float): Bitmap =
         operationDataSource.rotate(bitmap,angel)
 
+    override suspend fun invertColors(bitmap: Bitmap): Bitmap =
+        operationDataSource.invertColors(bitmap)
+
+
 }

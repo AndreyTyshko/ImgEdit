@@ -17,6 +17,7 @@ class PresentationModule {
         upsertOperationUseCase: UpsertOperationUseCase,
         getAllOperationsUseCase: GetAllOperationsUseCase,
        // flipOperationUseCase: FlipOperationUseCase,
+        invertImageUseCase: InvertImageUseCase,
         rotateImageUseCase: RotateImageUseCase,
         context: Context
     ): MainActivityViewModel = MainActivityViewModel(
@@ -25,6 +26,8 @@ class PresentationModule {
         getAllOperationsUseCase,
        // flipOperationUseCase,
         rotateImageUseCase,
+        invertImageUseCase,
         context
     )
+
 }

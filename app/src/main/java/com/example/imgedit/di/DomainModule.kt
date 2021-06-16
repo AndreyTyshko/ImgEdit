@@ -1,10 +1,7 @@
 package com.example.imgedit.di
 
 import com.example.imgedit.repository.OperationsRepository
-import com.example.imgedit.repository.usecase.DeleteOperationUseCase
-import com.example.imgedit.repository.usecase.GetAllOperationsUseCase
-import com.example.imgedit.repository.usecase.RotateImageUseCase
-import com.example.imgedit.repository.usecase.UpsertOperationUseCase
+import com.example.imgedit.repository.usecase.*
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -42,5 +39,12 @@ class DomainModule {
     fun provideRotateImageUseCase(
         operationsRepository: OperationsRepository
     ): RotateImageUseCase = RotateImageUseCase(operationsRepository)
+
+
+   @Singleton
+   @Provides
+   fun provideInvertImageUseCase(
+       operationsRepository: OperationsRepository
+   ):InvertImageUseCase=InvertImageUseCase(operationsRepository)
 
 }

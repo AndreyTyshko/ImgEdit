@@ -65,10 +65,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 viewModel.rotate(bitmap, 90f)
                 viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
-                    val rnds = (0..100).random()
-                    getImageUri(requireContext(), bitmap)?.let { it1 ->
-                        EditedImageModel(rnds, "Operation Rotate", it1)
-                    }?.let { it2 -> viewModel.upsertOperation(it2) }
+
 
                 }
             }
@@ -82,7 +79,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.invertColors(bitmap)
-                viewModel.changedImageInverted.observe(requireActivity()) {
+                viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
                 }
             }
@@ -97,7 +94,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.invertColors(bitmap)
-                viewModel.changedImageInverted.observe(requireActivity()) {
+                viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
                 }
 
@@ -117,12 +114,12 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
-                viewModel.changedImageMirror.observe(requireActivity()) {
+                viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
                     val rnds = (0..100).random()
-                    getImageUri(requireContext(), bitmap)?.let { it1 ->
-                        EditedImageModel(rnds, "Operation Mirror", it1)
-                    }?.let { it2 -> viewModel.upsertOperation(it2) }
+                   // viewModel.upsertOperation(EditedImageModel(rnds,"Operation Morrir",it))
+
+
                 }
 
 
@@ -142,19 +139,19 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             layoutManager = LinearLayoutManager(activity)
         }
     }
-
-    fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
-        val bytes = ByteArrayOutputStream()
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-        val path =
-            MediaStore.Images.Media.insertImage(
-                inContext.getContentResolver(),
-                inImage,
-                "Title",
-                null
-            )
-        return Uri.parse(path)
-    }
+//
+//    private fun getImageUri(inContext: Context, inImage: Bitmap): Uri {
+//        val bytes = ByteArrayOutputStream()
+//        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+//        val path =
+//            MediaStore.Images.Media.insertImage(
+//                inContext.contentResolver,
+//                inImage,
+//                "Title",
+//                null
+//            )
+//        return  Uri.parse(path)
+//    }
 
     private fun hasImage(view: ImageView): Boolean {
         val drawable = view.drawable
@@ -294,10 +291,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-
-
-
-
 
 
     override fun onActivityResult(

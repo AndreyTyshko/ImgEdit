@@ -1,18 +1,28 @@
 package com.example.imgedit.viewmodel
 
+import android.content.ContentValues
 import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.*
-import android.widget.Toast
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.MediaScannerConnection
+import android.net.Uri
+import android.os.Environment
+import android.os.Environment.DIRECTORY_PICTURES
+import android.os.Environment.getExternalStoragePublicDirectory
+import android.provider.MediaStore
+import android.util.Log
+import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.imgedit.dataBase.entity.EditedImageModel
-import com.example.imgedit.repository.usecase.DeleteOperationUseCase
-import com.example.imgedit.repository.usecase.GetAllOperationsUseCase
-import com.example.imgedit.repository.usecase.RotateImageUseCase
-import com.example.imgedit.repository.usecase.UpsertOperationUseCase
+import com.example.imgedit.repository.usecase.*
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.*
 import javax.inject.Inject
 
 
@@ -22,19 +32,12 @@ class MainActivityViewModel @Inject constructor(
     private val getAllOperationsUseCase: GetAllOperationsUseCase,
     // private val flipOperationUseCase: FlipOperationUseCase,
     private val rotateImageUseCase: RotateImageUseCase,
+    private val invertImageUseCase: InvertImageUseCase,
     private val context: Context
 ) : ViewModel() {
 
     var changedImage: MutableLiveData<Bitmap> = MutableLiveData()
-    var changedImageInverted: MutableLiveData<Bitmap> = MutableLiveData()
-    var changedImageMirror: MutableLiveData<Bitmap> = MutableLiveData()
 
-
-    fun upsertOperation(editedImageModel: EditedImageModel) {
-        viewModelScope.launch {
-            upsertOperationUseCase.invoke(editedImageModel)
-        }
-    }
 
     fun getAllOperations() = getAllOperationsUseCase
 
@@ -42,25 +45,16 @@ class MainActivityViewModel @Inject constructor(
     fun rotate(bitmap: Bitmap, angle: Float) {
         viewModelScope.launch {
             val id = System.currentTimeMillis() / 1000
-            //upsertOperationUseCase.invoke(EditedImageModel(rnds,"Rotated",))
-            changedImage.postValue(rotateImageUseCase.invoke(bitmap, angle))
+            val resultedImage = rotateImageUseCase.invoke(bitmap, angle)
+            changedImage.postValue(resultedImage)
         }
     }
 
 
     fun invertColors(bitmap: Bitmap) {
         viewModelScope.launch {
-
-            var matrix = ColorMatrix().apply {
-                setSaturation(0f)
-            }
-            var filter = ColorMatrixColorFilter(matrix)
-            var paint = Paint().apply {
-                colorFilter = filter
-            }
-            val mutableBitmap: Bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            Canvas(mutableBitmap).drawBitmap(bitmap, 0f, 0f, paint)
-            changedImageInverted.postValue(Bitmap.createBitmap(mutableBitmap))
+            val id = System.currentTimeMillis() / 1000
+            changedImage.postValue(invertImageUseCase.invoke(bitmap))
         }
     }
 
@@ -70,7 +64,7 @@ class MainActivityViewModel @Inject constructor(
             //flipOperationUseCase.invoke(bitmap, COORDINATION_SX, COORDINATION_SY)
             val matrix = Matrix()
             matrix.preScale(sx, sy)
-            changedImageMirror.postValue(
+            changedImage.postValue(
                 Bitmap.createBitmap(
                     bitmap,
                     0,
@@ -84,6 +78,7 @@ class MainActivityViewModel @Inject constructor(
         }
 
     }
+
 
     companion object {
         private const val COORDINATION_SX = -1.0f
