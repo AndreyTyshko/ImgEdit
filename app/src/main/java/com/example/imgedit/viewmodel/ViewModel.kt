@@ -1,16 +1,8 @@
 package com.example.imgedit.viewmodel
 
-import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.media.MediaScannerConnection
-import android.net.Uri
-import android.os.Environment
-import android.os.Environment.DIRECTORY_PICTURES
-import android.os.Environment.getExternalStoragePublicDirectory
-import android.provider.MediaStore
-import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,6 +25,7 @@ class MainActivityViewModel @Inject constructor(
     // private val flipOperationUseCase: FlipOperationUseCase,
     private val rotateImageUseCase: RotateImageUseCase,
     private val invertImageUseCase: InvertImageUseCase,
+    private val imageFlipHorizontalUseCase: ImageFlipHorizontalUseCase,
     private val context: Context
 ) : ViewModel() {
 
@@ -45,8 +38,8 @@ class MainActivityViewModel @Inject constructor(
     fun rotate(bitmap: Bitmap, angle: Float) {
         viewModelScope.launch {
             val id = System.currentTimeMillis() / 1000
-            val resultedImage = rotateImageUseCase.invoke(bitmap, angle)
-            changedImage.postValue(resultedImage)
+            //val resultedImage =
+            changedImage.postValue(rotateImageUseCase.invoke(bitmap, angle))
         }
     }
 
@@ -58,13 +51,15 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-
     fun imageFlipHorizontal(bitmap: Bitmap, sx: Float, sy: Float) {
         viewModelScope.launch {
-            //flipOperationUseCase.invoke(bitmap, COORDINATION_SX, COORDINATION_SY)
-            val matrix = Matrix()
-            matrix.preScale(sx, sy)
-            changedImage.postValue(
+
+            /*val id = System.currentTimeMillis() / 1000
+            val bitmap: Bitmap = imageFlipHorizontalUseCase.invoke(bitmap, sx, sy)*/
+            changedImage.postValue(imageFlipHorizontalUseCase(bitmap, sx, sy))
+
+
+            /*changedImage.postValue(
                 Bitmap.createBitmap(
                     bitmap,
                     0,
@@ -74,7 +69,7 @@ class MainActivityViewModel @Inject constructor(
                     matrix,
                     true
                 )
-            )
+            )*/
         }
 
     }

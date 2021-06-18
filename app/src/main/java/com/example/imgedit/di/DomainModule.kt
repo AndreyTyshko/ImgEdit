@@ -41,10 +41,16 @@ class DomainModule {
     ): RotateImageUseCase = RotateImageUseCase(operationsRepository)
 
 
-   @Singleton
-   @Provides
-   fun provideInvertImageUseCase(
-       operationsRepository: OperationsRepository
-   ):InvertImageUseCase=InvertImageUseCase(operationsRepository)
+    @Singleton
+    @Provides
+    fun provideInvertImageUseCase(
+        operationsRepository: OperationsRepository
+    ): InvertImageUseCase = InvertImageUseCase(operationsRepository)
+
+    @Singleton
+    @Provides
+    fun provideImageFlipHorizontalUseCase(
+        operationsRepository: OperationsRepository
+    ): ImageFlipHorizontalUseCase = ImageFlipHorizontalUseCase(operationsRepository)
 
 }

@@ -14,6 +14,8 @@ interface OperationDataSource {
 //
 //    suspend fun flip(drawable: Drawable): Drawable
     suspend fun invertColors(bitmap: Bitmap): Bitmap
+
+    suspend fun imageFlipHorizontal(bitmap: Bitmap, sx:Float, sy:Float):Bitmap
 }
 
 class OperationDataSourceImpl : OperationDataSource {
@@ -21,15 +23,7 @@ class OperationDataSourceImpl : OperationDataSource {
     override suspend fun rotate(bitmap: Bitmap, angle: Float): Bitmap {
         val matrix = Matrix()
         matrix.postRotate(angle)
-        return Bitmap.createBitmap(
-            bitmap,
-            0,
-            0,
-            bitmap.width,
-            bitmap.height,
-            matrix,
-            true
-        )
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
     }
 
@@ -48,9 +42,13 @@ class OperationDataSourceImpl : OperationDataSource {
         return mutableBitmap
     }
 
-//
-//    override suspend fun flip(drawable: Drawable): Drawable {
-//        TODO("Not yet implemented")
-//    }
+
+    override suspend fun imageFlipHorizontal(bitmap: Bitmap, sx: Float, sy: Float): Bitmap {
+       // TODO("Not yet implemented")
+        val matrix = Matrix()
+        matrix.preScale(sx, sy)
+         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+    }
 
 }

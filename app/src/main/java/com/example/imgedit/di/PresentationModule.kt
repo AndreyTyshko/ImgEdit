@@ -16,7 +16,7 @@ class PresentationModule {
         deleteArticleUseCase: DeleteOperationUseCase,
         upsertOperationUseCase: UpsertOperationUseCase,
         getAllOperationsUseCase: GetAllOperationsUseCase,
-       // flipOperationUseCase: FlipOperationUseCase,
+        imageFlipHorizontalUseCase: ImageFlipHorizontalUseCase,
         invertImageUseCase: InvertImageUseCase,
         rotateImageUseCase: RotateImageUseCase,
         context: Context
@@ -24,10 +24,9 @@ class PresentationModule {
         deleteArticleUseCase,
         upsertOperationUseCase,
         getAllOperationsUseCase,
-       // flipOperationUseCase,
         rotateImageUseCase,
         invertImageUseCase,
+        imageFlipHorizontalUseCase,
         context
     )
-
 }

@@ -26,11 +26,13 @@ class OperationRepositoryImpl @Inject constructor(
 //        TODO("Not yet implemented")
 //    }
 
-    override suspend fun rotate(bitmap: Bitmap, angel: Float): Bitmap =
-        operationDataSource.rotate(bitmap,angel)
+    override suspend fun rotate(bitmap: Bitmap, angle: Float): Bitmap =
+        operationDataSource.rotate(bitmap,angle)
 
     override suspend fun invertColors(bitmap: Bitmap): Bitmap =
         operationDataSource.invertColors(bitmap)
 
+    override suspend fun imageFlipHorizontal(bitmap: Bitmap, sx:Float, sy:Float): Bitmap =
+        operationDataSource.imageFlipHorizontal(bitmap,sx, sy)
 
 }

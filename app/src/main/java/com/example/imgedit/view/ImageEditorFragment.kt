@@ -4,18 +4,17 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.Toast
+import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -23,11 +22,9 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.imgedit.MainActivity
 import com.example.imgedit.R
-import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.viewmodel.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_image_editor_framgnet.*
-import java.io.ByteArrayOutputStream
 
 
 class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
@@ -54,27 +51,21 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             showImagePickDialog()
         }
 
-
-
-
         buttonRotate.setOnClickListener {
             if (!hasImage(iv_input_img)) {
-                errorMessage()
+                showImagePickDialog()
             } else {
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.rotate(bitmap, 90f)
                 viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
-
-
                 }
             }
         }
 
-
         buttonInvColor.setOnClickListener {
             if (!hasImage(iv_input_img)) {
-                errorMessage()
+                showImagePickDialog()
             } else {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
@@ -84,45 +75,17 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 }
             }
         }
-
-
-
-        buttonInvColor.setOnClickListener {
-            if (!hasImage(iv_input_img)) {
-                errorMessage()
-            } else {
-
-                val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
-                viewModel.invertColors(bitmap)
-                viewModel.changedImage.observe(requireActivity()) {
-                    imageViewResult.setImageBitmap(it)
-                }
-
-
-            }
-        }
-
-
-
-
-
 
         buttonMirrImg.setOnClickListener {
-            if (!hasImage2(iv_input_img)) {
-                errorMessage()
+            if (!hasImage(iv_input_img)) {
+                showImagePickDialog()
             } else {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
                 viewModel.changedImage.observe(requireActivity()) {
                     imageViewResult.setImageBitmap(it)
-                    val rnds = (0..100).random()
-                   // viewModel.upsertOperation(EditedImageModel(rnds,"Operation Morrir",it))
-
-
                 }
-
-
             }
         }
 
@@ -153,17 +116,26 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 //        return  Uri.parse(path)
 //    }
 
-    private fun hasImage(view: ImageView): Boolean {
-        val drawable = view.drawable
-        var hasImage: Boolean = (drawable != null)
+    /* private fun hasImage(view: ImageView): Boolean {
+         val drawable = view.drawable
+         var hasImage: Boolean = (drawable != null)
+         if (hasImage && drawable is BitmapDrawable) {
+             hasImage = drawable.bitmap != null
+         }
+         return hasImage
+     }*/
+
+    private fun hasImage(@NonNull view: ImageView): Boolean {
+        val drawable: Drawable? = view.drawable
+        var hasImage = drawable != null
         if (hasImage && drawable is BitmapDrawable) {
-            hasImage = drawable.bitmap != null
+            hasImage = (drawable as BitmapDrawable?)!!.bitmap != null
         }
         return hasImage
     }
 
-    private fun hasImage2(view: ImageView) =
-        view.drawable != null
+    /*private fun hasImage2(view: ImageView) =
+        view.drawable != null*/
 
 
     private fun errorMessage() = Snackbar.make(
@@ -235,11 +207,9 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
     private fun checkCameraPermission(): Boolean {
-        val result = ContextCompat.checkSelfPermission(
-            requireActivity(),
-            Manifest.permission.CAMERA
-        ) ==
-                PackageManager.PERMISSION_GRANTED
+        val result =
+            ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.CAMERA) ==
+                    PackageManager.PERMISSION_GRANTED
         val result1 = ContextCompat.checkSelfPermission(
             requireActivity(),
             Manifest.permission.WRITE_EXTERNAL_STORAGE

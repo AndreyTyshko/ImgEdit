@@ -18,4 +18,6 @@ interface OperationsRepository {
 
     suspend fun invertColors (bitmap: Bitmap):Bitmap
 
+    suspend fun imageFlipHorizontal(bitmap: Bitmap,sx:Float, sy:Float):Bitmap
+
 }
