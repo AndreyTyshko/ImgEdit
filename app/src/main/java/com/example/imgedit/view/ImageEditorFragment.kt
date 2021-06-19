@@ -288,15 +288,15 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //Toast.makeText(this@MainActivity, "Camera Permission Granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Camera Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
-                //Toast.makeText(this@MainActivity, "Camera Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Camera Permission Denied", Toast.LENGTH_SHORT).show()
             }
         } else if (requestCode == STORAGE_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-               // Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
-                //Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
