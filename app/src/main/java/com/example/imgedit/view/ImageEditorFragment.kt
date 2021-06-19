@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -148,12 +149,10 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         val options = arrayOf("Camera", "Gallery")
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Выберите изображение")
-            .setItems(options) { _, which ->
-                if (which == 0) {
-                    if (checkCameraPermission()) {
-                        pickFromCamera()
+            .setItems(options) { _, which -> if (which == 0) {
+                    if (checkPermissionCamera()) {  pickFromCamera()
                     } else {
-                        requestCameraPermission()
+                        requestPermission()
                     }
                 } else {
                     if (checkStoragePermission()) {
@@ -198,6 +197,64 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+
+    private fun checkPermissionCamera(): Boolean {
+        val result = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.CAMERA
+        )
+        return result == PackageManager.PERMISSION_GRANTED
+    }
+
+
+    private fun requestPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.CAMERA
+            )
+        ) {
+            Toast.makeText(
+                context,
+                "Camera permission allows us to access location data. Please allow in App Settings for additional functionality.",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_REQUEST_CODE
+            )
+        }
+    }
+
+
+   override fun onRequestPermissionsResult(
+       requestCode: Int,
+       permissions: Array<String>,
+       grantResults: IntArray
+   ) {
+        when (requestCode) {
+            CAMERA_REQUEST_CODE -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Snackbar.make(
+                    requireView(),
+                    "Permission Granted, Now you can access location data.",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            } else {
+                Snackbar.make(
+                    requireView(),
+                    "Permission Denied, You cannot access location data.",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+
+
+
+
+
     private fun requestStoragePermission() {
         storagePermission?.let {
             ActivityCompat.requestPermissions(
@@ -230,7 +287,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
     }
 
-    override fun onRequestPermissionsResult(
+    /*override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String?>,
         grantResults: IntArray
@@ -260,7 +317,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
+    }*/
 
 
     override fun onActivityResult(
