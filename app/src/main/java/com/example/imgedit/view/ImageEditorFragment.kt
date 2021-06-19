@@ -152,13 +152,13 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             .setItems(options) { _, which -> if (which == 0) {
                     if (checkPermissionCamera()) {  pickFromCamera()
                     } else {
-                        requestPermission()
+                        requestPermissionCamera()
                     }
                 } else {
-                    if (checkStoragePermission()) {
+                    if (checkPermissionStorage()) {
                         pickFromGallery()
                     } else {
-                        requestStoragePermission()
+                        requestPermissionStorage()
                     }
                 }
             }
@@ -207,7 +207,16 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
 
-    private fun requestPermission() {
+
+    private fun checkPermissionStorage(): Boolean {
+        val result = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        return result == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestPermissionCamera() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
                 requireActivity(),
                 Manifest.permission.CAMERA
@@ -228,7 +237,31 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
 
-   override fun onRequestPermissionsResult(
+
+    private fun requestPermissionStorage() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
+            Toast.makeText(
+                context,
+                "Camera permission allows us to access location data. Please allow in App Settings for additional functionality.",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                STORAGE_REQUEST_CODE
+            )
+        }
+    }
+
+
+
+
+/*    override fun onRequestPermissionsResult(
        requestCode: Int,
        permissions: Array<String>,
        grantResults: IntArray
@@ -248,10 +281,25 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 ).show()
             }
         }
+    }*/
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Toast.makeText(this@MainActivity, "Camera Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                //Toast.makeText(this@MainActivity, "Camera Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == STORAGE_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+               // Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                //Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
-
-
-
 
 
 
@@ -287,7 +335,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
     }
 
-    /*override fun onRequestPermissionsResult(
+  /*  override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String?>,
         grantResults: IntArray
