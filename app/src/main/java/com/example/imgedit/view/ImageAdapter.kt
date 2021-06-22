@@ -1,6 +1,7 @@
 package com.example.imgedit.view
 
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,11 +43,6 @@ class ImageAdapter() : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
     }
 
 
-
-
-
-
-    //TODO
     private var onItemClickListener: ((Uri) -> Unit)? = null
 
     fun setOnItemClickListener(listener: (Uri) -> Unit) {

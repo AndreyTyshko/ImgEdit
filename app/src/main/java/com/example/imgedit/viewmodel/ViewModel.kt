@@ -2,19 +2,15 @@ package com.example.imgedit.viewmodel
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Matrix
-import androidx.core.content.FileProvider
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.repository.usecase.*
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.io.OutputStream
-import java.util.*
 import javax.inject.Inject
 
 
@@ -22,58 +18,70 @@ class MainActivityViewModel @Inject constructor(
     private val deleteOperationUseCase: DeleteOperationUseCase,
     private val upsertOperationUseCase: UpsertOperationUseCase,
     private val getAllOperationsUseCase: GetAllOperationsUseCase,
-    // private val flipOperationUseCase: FlipOperationUseCase,
     private val rotateImageUseCase: RotateImageUseCase,
     private val invertImageUseCase: InvertImageUseCase,
     private val imageFlipHorizontalUseCase: ImageFlipHorizontalUseCase,
     private val context: Context
 ) : ViewModel() {
 
-    var changedImage: MutableLiveData<Bitmap> = MutableLiveData()
+    var changedImageRotate: MutableLiveData<Bitmap> = MutableLiveData()
 
 
     fun getAllOperations() = getAllOperationsUseCase
 
-
-    fun rotate(bitmap: Bitmap, angle: Float) {
+    fun upsertOperation(bitmap: Bitmap, operationName: String) {
         viewModelScope.launch {
             val id = System.currentTimeMillis() / 1000
-            //val resultedImage =
-            changedImage.postValue(rotateImageUseCase.invoke(bitmap, angle))
+            val editedImageModel = EditedImageModel(id.toInt(), operationName, getImageUri(bitmap, id.toInt()))
+            upsertOperationUseCase.invoke(editedImageModel)
+        }
+    }
+
+    fun deleteOperation(editedImageModel: EditedImageModel){
+        viewModelScope.launch {
+            deleteOperationUseCase.invoke(editedImageModel)
         }
     }
 
 
+    fun rotate(bitmap: Bitmap, angle: Float) {
+        viewModelScope.launch {
+            val resultedImage = rotateImageUseCase.invoke(bitmap, angle)
+            upsertOperation(resultedImage, "Operation rotate")
+            changedImageRotate.postValue(resultedImage)
+        }
+    }
+
     fun invertColors(bitmap: Bitmap) {
         viewModelScope.launch {
-            val id = System.currentTimeMillis() / 1000
-            changedImage.postValue(invertImageUseCase.invoke(bitmap))
+            val resultedImage = invertImageUseCase.invoke(bitmap)
+            upsertOperation(resultedImage, "Operation invert")
+            changedImageRotate.postValue(resultedImage)
         }
     }
 
     fun imageFlipHorizontal(bitmap: Bitmap, sx: Float, sy: Float) {
         viewModelScope.launch {
+            val resultedImage = imageFlipHorizontalUseCase(bitmap, sx, sy)
+            upsertOperation(resultedImage, "Operation flip")
+            changedImageRotate.postValue(resultedImage)
 
-            /*val id = System.currentTimeMillis() / 1000
-            val bitmap: Bitmap = imageFlipHorizontalUseCase.invoke(bitmap, sx, sy)*/
-            changedImage.postValue(imageFlipHorizontalUseCase(bitmap, sx, sy))
-
-
-            /*changedImage.postValue(
-                Bitmap.createBitmap(
-                    bitmap,
-                    0,
-                    0,
-                    bitmap.width,
-                    bitmap.height,
-                    matrix,
-                    true
-                )
-            )*/
         }
-
     }
 
+    private fun getImageUri(bitmap: Bitmap, id: Int): Uri {
+        val file = getFileFromBitmap(bitmap, id)
+        return Uri.parse(file.toURI().toString())
+    }
+
+
+    private fun getFileFromBitmap(bitmap: Bitmap, id: Int): File {
+        val file = File(context.cacheDir, "$id.png")
+        val fos = FileOutputStream(file)
+        fos.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos) }
+        file.setReadable(true, false)
+        return file
+    }
 
     companion object {
         private const val COORDINATION_SX = -1.0f
