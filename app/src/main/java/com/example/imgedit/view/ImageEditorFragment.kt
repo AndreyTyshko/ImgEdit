@@ -3,9 +3,8 @@ package com.example.imgedit.view
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.ActivityNotFoundException
 import android.content.ContentValues
-import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -14,7 +13,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -28,32 +26,56 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.imgedit.MainActivity
 import com.example.imgedit.R
-import com.example.imgedit.dataBase.entity.EditedImageModel
 import com.example.imgedit.viewmodel.MainActivityViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_image_editor_framgnet.*
-import java.io.File
-import java.io.FileOutputStream
 
 
 class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
+
     private var currentImage: Uri? = null
     private val storagePermission: Array<String>? = null
     private var imageAdapter: ImageAdapter? = null
-
     lateinit var viewModel: MainActivityViewModel
+    var imageUri: Uri? = null
+    private var currentImage1: Bitmap? = null
+    private var resultImage: Bitmap? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        currentImage1 = savedInstanceState?.get(KEY_IMG) as Bitmap?
+        resultImage = savedInstanceState?.get(KEY_RESULT_IMAGE) as Bitmap?
+        super.onCreate(savedInstanceState)
+
+
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        iv_input_img.setImageBitmap(currentImage1)
+        imageViewResult.setImageBitmap(resultImage)
         viewModel = (activity as MainActivity).viewModel
 
         bindRV()
 
         imageAdapter?.setOnItemClickListener {
-            imageViewResult.setImageURI(it)
+            val builder = AlertDialog.Builder(activity)
+            builder.setTitle("Выберите действие")
+                .setNegativeButton("Удалить операцию"
+                ) { dialog, _ ->
+                    viewModel.deleteOperation(it)
+                    viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
+                        imageAdapter?.differ?.submitList(it)}
+                    dialog.cancel()
+                }
+                .setPositiveButton("Использовать повторно"
+                ) { dialog, _ ->
+                    iv_input_img.setImageURI(it.image)
+                    dialog.cancel()
+                }
+            builder.create().show()
         }
 
         iv_input_img.setOnClickListener {
@@ -66,10 +88,12 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
             } else {
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.rotate(bitmap, 90f)
-                viewModel.changedImageRotate.observe(viewLifecycleOwner) {
-                    imageViewResult.setImageBitmap(it) }
+                viewModel.changedImage.observe(viewLifecycleOwner) {
+                    imageViewResult.setImageBitmap(it)
+                }
             }
         }
+
 
         buttonInvColor.setOnClickListener {
             if (!hasImage(iv_input_img)) {
@@ -78,8 +102,9 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.invertColors(bitmap)
-                viewModel.changedImageRotate.observe(viewLifecycleOwner) {
-                    imageViewResult.setImageBitmap(it) }
+                viewModel.changedImage.observe(viewLifecycleOwner) {
+                    imageViewResult.setImageBitmap(it)
+                }
             }
         }
 
@@ -90,16 +115,17 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
                 val bitmap = (iv_input_img.drawable as BitmapDrawable).bitmap
                 viewModel.imageFlipHorizontal(bitmap, -1.0f, 1.0f)
-                viewModel.changedImageRotate.observe(viewLifecycleOwner) {
-                    imageViewResult.setImageBitmap(it) }
+                viewModel.changedImage.observe(viewLifecycleOwner) {
+                    imageViewResult.setImageBitmap(it)
                 }
+            }
         }
 
         viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
             imageAdapter?.differ?.submitList(it)
         }
 
-        val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(
+        /*val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
         ) {
@@ -116,18 +142,19 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
                 val operation = imageAdapter?.differ!!.currentList[position]
                 viewModel.deleteOperation(operation)
                 Snackbar.make(view, "Операция удалена!", Snackbar.LENGTH_LONG).show()
-                }
             }
+        }
 
         ItemTouchHelper(itemTouchHelper).apply {
             attachToRecyclerView(recyclerView)
         }
 
         viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
-        imageAdapter?.differ?.submitList(it)
-    }
+            imageAdapter?.differ?.submitList(it)
+        }*/
 
     }
+
 
     private fun bindRV() {
         imageAdapter = ImageAdapter()
@@ -138,7 +165,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
     }
 
-    private fun scroll(){
+    private fun scroll() {
         imageAdapter?.itemCount?.minus(1)?.let { recyclerView.scrollToPosition(it) }
     }
 
@@ -151,13 +178,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         return hasImage
     }
 
-/*
-
-    private fun errorMessage() = Snackbar.make(
-        requireActivity().findViewById(android.R.id.content),
-        "Error",
-        Snackbar.LENGTH_LONG
-    ).show()*/
 
     private fun showImagePickDialog() {
         val options = arrayOf("Camera", "Gallery")
@@ -191,18 +211,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
 
-    val REQUEST_IMAGE_CAPTURE = 1
-
-    private fun dispatchTakePictureIntent() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-        } catch (e: ActivityNotFoundException) {
-            // display error state to the user
-        }
-    }
-
-
     private fun pickFromCamera() {
         val contentValues = ContentValues()
         contentValues.put(MediaStore.Images.Media.TITLE, "Temp_Image Title")
@@ -215,14 +223,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, currentImage)
         startActivityForResult(intent, IMAGE_PICK_CAMERA_CODE)
     }
-
-    private fun checkStoragePermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            requireActivity(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
 
     private fun checkPermissionCamera(): Boolean {
         val result = ContextCompat.checkSelfPermission(
@@ -283,29 +283,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
 
-/*    override fun onRequestPermissionsResult(
-       requestCode: Int,
-       permissions: Array<String>,
-       grantResults: IntArray
-   ) {
-        when (requestCode) {
-            CAMERA_REQUEST_CODE -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Snackbar.make(
-                    requireView(),
-                    "Permission Granted, Now you can access location data.",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            } else {
-                Snackbar.make(
-                    requireView(),
-                    "Permission Denied, You cannot access location data.",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-    }*/
-
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -327,72 +304,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         }
     }
 
-
-    private fun requestStoragePermission() {
-        storagePermission?.let {
-            ActivityCompat.requestPermissions(
-                requireActivity(), it, STORAGE_REQUEST_CODE
-            )
-        }
-    }
-
-    private fun checkCameraPermission(): Boolean {
-        val result =
-            ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.CAMERA) ==
-                    PackageManager.PERMISSION_GRANTED
-        val result1 = ContextCompat.checkSelfPermission(
-            requireActivity(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) ==
-                PackageManager.PERMISSION_GRANTED
-        return result && result1
-    }
-
-    private fun requestCameraPermission() {
-        storagePermission.let {
-            if (it != null) {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    it,
-                    CAMERA_REQUEST_CODE
-                )
-            }
-        }
-    }
-
-    /*  override fun onRequestPermissionsResult(
-          requestCode: Int,
-          permissions: Array<String?>,
-          grantResults: IntArray
-      ) {
-          when (requestCode) {
-              CAMERA_REQUEST_CODE -> {
-                  if (grantResults.isNotEmpty()) {
-                      val cameraAccepted =
-                          grantResults[0] == PackageManager.PERMISSION_GRANTED
-                      val storageAccepted =
-                          grantResults[1] == PackageManager.PERMISSION_GRANTED
-                      if (cameraAccepted && storageAccepted) {
-                          pickFromCamera()
-                      } else {
-                          //TODO
-                      }
-                  }
-                  if (grantResults.size > 0) {
-                      val storageAccepted =
-                          grantResults[0] == PackageManager.PERMISSION_GRANTED
-                      if (storageAccepted) {
-                          pickFromGallery()
-                      } else {
-
-                      }
-                  }
-              }
-          }
-          super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-      }*/
-
-
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -412,12 +323,27 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
     }
 
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        val drawable: BitmapDrawable = iv_input_img.drawable as BitmapDrawable
+        val drawableResult: BitmapDrawable = imageViewResult.drawable as BitmapDrawable
+        val some = drawable.bitmap
+        val someResult = drawableResult.bitmap
+        outState.putParcelable(KEY_IMG, some)
+        outState.putParcelable(KEY_RESULT_IMAGE, someResult)
+
+        super.onSaveInstanceState(outState)
+    }
+
+
     companion object {
 
         private const val CAMERA_REQUEST_CODE = 100
         private const val STORAGE_REQUEST_CODE = 200
         private const val IMAGE_PICK_GALLERY_CODE = 300
         private const val IMAGE_PICK_CAMERA_CODE = 400
+        private const val KEY_INDEX = "index"
+        private const val KEY_IMG = "index"
+        private const val KEY_RESULT_IMAGE = "resultImage"
 
     }
 

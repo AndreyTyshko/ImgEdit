@@ -24,20 +24,21 @@ class MainActivityViewModel @Inject constructor(
     private val context: Context
 ) : ViewModel() {
 
-    var changedImageRotate: MutableLiveData<Bitmap> = MutableLiveData()
-
+    var changedImage: MutableLiveData<Bitmap> = MutableLiveData()
+    var resultedImage: MutableLiveData<Bitmap> = MutableLiveData()
 
     fun getAllOperations() = getAllOperationsUseCase
 
     fun upsertOperation(bitmap: Bitmap, operationName: String) {
         viewModelScope.launch {
             val id = System.currentTimeMillis() / 1000
-            val editedImageModel = EditedImageModel(id.toInt(), operationName, getImageUri(bitmap, id.toInt()))
+            val editedImageModel =
+                EditedImageModel(id.toInt(), operationName, getImageUri(bitmap, id.toInt()))
             upsertOperationUseCase.invoke(editedImageModel)
         }
     }
 
-    fun deleteOperation(editedImageModel: EditedImageModel){
+    fun deleteOperation(editedImageModel: EditedImageModel) {
         viewModelScope.launch {
             deleteOperationUseCase.invoke(editedImageModel)
         }
@@ -48,7 +49,7 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             val resultedImage = rotateImageUseCase.invoke(bitmap, angle)
             upsertOperation(resultedImage, "Operation rotate")
-            changedImageRotate.postValue(resultedImage)
+            changedImage.postValue(resultedImage)
         }
     }
 
@@ -56,7 +57,7 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             val resultedImage = invertImageUseCase.invoke(bitmap)
             upsertOperation(resultedImage, "Operation invert")
-            changedImageRotate.postValue(resultedImage)
+            changedImage.postValue(resultedImage)
         }
     }
 
@@ -64,7 +65,7 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             val resultedImage = imageFlipHorizontalUseCase(bitmap, sx, sy)
             upsertOperation(resultedImage, "Operation flip")
-            changedImageRotate.postValue(resultedImage)
+            changedImage.postValue(resultedImage)
 
         }
     }
@@ -82,6 +83,8 @@ class MainActivityViewModel @Inject constructor(
         file.setReadable(true, false)
         return file
     }
+
+
 
     companion object {
         private const val COORDINATION_SX = -1.0f

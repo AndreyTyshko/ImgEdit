@@ -43,9 +43,9 @@ class ImageAdapter() : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
     }
 
 
-    private var onItemClickListener: ((Uri) -> Unit)? = null
+    private var onItemClickListener: ((EditedImageModel) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Uri) -> Unit) {
+    fun setOnItemClickListener(listener: (EditedImageModel) -> Unit) {
         onItemClickListener = listener
     }
 
@@ -59,7 +59,7 @@ class ImageAdapter() : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
             tv_desc.text = item.text
             Glide.with(this).load(item.image).into(iv_previous_image)
             setOnClickListener {
-                onItemClickListener?.let { it(item.image) }
+                onItemClickListener?.let { it(item) }
             }
         }
     }
