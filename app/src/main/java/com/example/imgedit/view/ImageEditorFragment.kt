@@ -47,8 +47,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         currentImage1 = savedInstanceState?.get(KEY_IMG) as Bitmap?
         resultImage = savedInstanceState?.get(KEY_RESULT_IMAGE) as Bitmap?
         super.onCreate(savedInstanceState)
-
-
     }
 
 
@@ -62,15 +60,18 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
         imageAdapter?.setOnItemClickListener {
             val builder = AlertDialog.Builder(activity)
-            builder.setTitle("Выберите действие")
-                .setNegativeButton("Удалить операцию"
+            builder.setTitle(getString(R.string.Select_action))
+                .setNegativeButton(
+                    getString(R.string.delete_action)
                 ) { dialog, _ ->
                     viewModel.deleteOperation(it)
                     viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
-                        imageAdapter?.differ?.submitList(it)}
+                        imageAdapter?.differ?.submitList(it)
+                    }
                     dialog.cancel()
                 }
-                .setPositiveButton("Использовать повторно"
+                .setPositiveButton(
+                    getString(R.string.reuse_operation)
                 ) { dialog, _ ->
                     iv_input_img.setImageURI(it.image)
                     dialog.cancel()
@@ -124,35 +125,6 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
             imageAdapter?.differ?.submitList(it)
         }
-
-        /*val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return true
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val operation = imageAdapter?.differ!!.currentList[position]
-                viewModel.deleteOperation(operation)
-                Snackbar.make(view, "Операция удалена!", Snackbar.LENGTH_LONG).show()
-            }
-        }
-
-        ItemTouchHelper(itemTouchHelper).apply {
-            attachToRecyclerView(recyclerView)
-        }
-
-        viewModel.getAllOperations().invoke().observe(viewLifecycleOwner) {
-            imageAdapter?.differ?.submitList(it)
-        }*/
-
     }
 
 
@@ -180,9 +152,9 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
 
 
     private fun showImagePickDialog() {
-        val options = arrayOf("Camera", "Gallery")
+        val options = arrayOf(getString(R.string.camera), getString(R.string.gallery))
         val builder = AlertDialog.Builder(requireActivity())
-        builder.setTitle("Выберите изображение")
+        builder.setTitle(getString(R.string.select_image))
             .setItems(options) { _, which ->
                 if (which == 0) {
                     if (checkPermissionCamera()) {
@@ -249,7 +221,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         ) {
             Toast.makeText(
                 context,
-                "Camera permission allows us to access location data. Please allow in App Settings for additional functionality.",
+                getString(R.string.allow_camera),
                 Toast.LENGTH_LONG
             ).show()
         } else {
@@ -270,7 +242,7 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         ) {
             Toast.makeText(
                 context,
-                "Camera permission allows us to access location data. Please allow in App Settings for additional functionality.",
+                getString(R.string.allow_storage),
                 Toast.LENGTH_LONG
             ).show()
         } else {
@@ -291,15 +263,19 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Camera Permission Granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.camera_granted), Toast.LENGTH_SHORT)
+                    .show()
             } else {
-                Toast.makeText(context, "Camera Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.camera_denied), Toast.LENGTH_SHORT)
+                    .show()
             }
         } else if (requestCode == STORAGE_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(context, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.storage_granted), Toast.LENGTH_SHORT)
+                    .show()
             } else {
-                Toast.makeText(context, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.storage_denied), Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -346,6 +322,4 @@ class ImageEditorFragment : Fragment(R.layout.fragment_image_editor_framgnet) {
         private const val KEY_RESULT_IMAGE = "resultImage"
 
     }
-
-
 }
